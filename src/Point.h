@@ -17,6 +17,7 @@ struct Point {
     return !(rhs == *this);
   }
 
+
   Point(double x, double y) : x(x), y(y) {}
 
   Point() {}

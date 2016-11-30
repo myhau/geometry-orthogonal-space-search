@@ -75,7 +75,7 @@ private:
 
   NodePtr buildTree(const Vec &elements) {
     Vec sortedVec(elements);
-    std::sort(sortedVec.begin(), sortedVec.end(), );
+    std::sort(sortedVec.begin(), sortedVec.end(), [this](const T &p1, const T &p2) {return keyF(p2) > keyF(p1);});
 
     return buildSubTree(sortedVec, 0, sortedVec.size() - 1);
   }
@@ -161,7 +161,7 @@ public:
           tree(buildTree(els)) {
   }
 
-  RangeSearchTree() : keyF([](T a){return 0.0;}), tree(nullptr) {}
+  RangeSearchTree() : keyF([](T a) { return 0.0; }), tree(nullptr) {}
 
 
 //  RangeSearchTree(const vector<T>& els, function<double(T*)> keyF) {
@@ -181,9 +181,9 @@ public:
 
     Set collectTo;
 
-    if(vSplitTree == nullptr) return collectTo;
+    if (vSplitTree == nullptr) return collectTo;
 
-    if(vSplitTree->isLeaf && (vSplitTree->key >= keyFrom && vSplitTree->key <= keyTo)) {
+    if (vSplitTree->isLeaf && (vSplitTree->key >= keyFrom && vSplitTree->key <= keyTo)) {
       collectTo.insert(vSplitTree->value);
       return collectTo;
     } else {

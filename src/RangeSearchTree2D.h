@@ -115,7 +115,7 @@ public:
           tree(buildTree(els)) {
   }
 
-  set<T> search(double x1, double x2, double y1, double y2) const {
+  vector<T> search(double x1, double x2, double y1, double y2) const {
 
     if (x1 > x2) {
       auto err = (boost::format("Invalid arguments x1, x2 from %s to %s") % x1 % x2).str();
@@ -127,7 +127,7 @@ public:
 
 //    NodePtr vSplitTree = findVSplit(tree, );
 
-    Set collectTo;
+    vector<T> collectTo;
 
 //    if(vSplitTree == nullptr) return collectTo;
 //
