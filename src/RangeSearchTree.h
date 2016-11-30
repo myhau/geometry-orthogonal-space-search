@@ -7,6 +7,7 @@
 #include <boost/format.hpp>
 #include <iostream>
 #include "Node.h"
+#include <memory>
 #include "../src/util/PrettyPrintNode.h"
 
 using std::vector;
@@ -16,21 +17,27 @@ using std::iterator;
 using std::copy;
 using std::cout;
 using std::endl;
+using std::shared_ptr;
+using std::make_shared;
+
+template<typename T>
+using KeyFunction = function<double(T)>;
+
 
 template<typename T>
 class RangeSearchTree {
 private:
 
-  using KeyFunction = function<double(T)>;
+  using TreeKeyFunction = KeyFunction<T>;
   using NodePtr = Node<T> *;
   using Vec = vector<T>;
   using Set = set<T>;
 
-  KeyFunction keyF;
+  TreeKeyFunction keyF;
 
   NodePtr tree;
 
-  NodePtr buildSubTree(const Vec &els, long beg, long end) {
+  NodePtr buildSubTree(const Vec &els, size_t beg, size_t end) {
 
     if (beg > end) {
       return nullptr;
@@ -38,9 +45,10 @@ private:
 
     if (beg == end) {
       auto value = els[beg];
-      return new Node<T>(keyF(value), value);
+      return make_node_ptr(keyF(value), value);
     }
 
+    // TODO: probably we can simplify this code here
     auto medPos = beg + end;
     auto medianPosition = medPos / 2;
     double median;
@@ -62,12 +70,15 @@ private:
       firstEndI = medianPosition + 1;
     }
 
-
-    auto medianNode = new Node<T>(median);
+    auto medianNode = make_node_ptr<T>(median);
 
     if (firstEndI >= beg) {
-      medianNode->left = buildSubTree(els, beg, firstEndI);
-      medianNode->right = buildSubTree(els, firstEndI + 1, end);
+      if(firstEndI != end) {
+        medianNode->left = buildSubTree(els, beg, firstEndI);
+      }
+      if(firstEndI + 1 != beg) {
+        medianNode->right = buildSubTree(els, firstEndI + 1, end);
+      }
     }
 
     return medianNode;
@@ -156,7 +167,7 @@ private:
 
 public:
 
-  RangeSearchTree(const vector<T> &els, KeyFunction keyF) :
+  RangeSearchTree(const vector<T> &els, TreeKeyFunction keyF) :
           keyF(keyF),
           tree(buildTree(els)) {
   }
@@ -172,6 +183,12 @@ public:
 
 
   Set search(double keyFrom, double keyTo) const {
+    Set collectTo;
+    search(keyFrom, keyTo, collectTo);
+    return collectTo;
+  }
+
+  void search(double keyFrom, double keyTo, set<T>& collectorSet) const {
     if (keyFrom > keyTo) {
       auto err = (boost::format("Invalid arguments from %s to %s") % keyFrom % keyTo).str();
       throw std::invalid_argument(err);
@@ -179,25 +196,33 @@ public:
 
     NodePtr vSplitTree = findVSplit(tree, keyFrom, keyTo);
 
-    Set collectTo;
-
-    if (vSplitTree == nullptr) return collectTo;
+    if (vSplitTree == nullptr) return;
 
     if (vSplitTree->isLeaf && (vSplitTree->key >= keyFrom && vSplitTree->key <= keyTo)) {
-      collectTo.insert(vSplitTree->value);
-      return collectTo;
+      collectorSet.insert(vSplitTree->value);
     } else {
-      collectAll(vSplitTree, keyFrom, keyTo, LEFT, collectTo);
-      collectAll(vSplitTree, keyFrom, keyTo, RIGHT, collectTo);
+      collectAll(vSplitTree, keyFrom, keyTo, LEFT, collectorSet);
+      collectAll(vSplitTree, keyFrom, keyTo, RIGHT, collectorSet);
     }
-
-    return collectTo;
   }
+
 
   virtual ~RangeSearchTree() {
     destruct(tree);
   }
 };
+
+
+template<typename T>
+RangeSearchTree<T> make_range_search_tree(const vector<T> &els, KeyFunction<T> keyF) {
+  return RangeSearchTree<T>(els, keyF);
+}
+
+template<typename T>
+shared_ptr<RangeSearchTree<T>> make_range_search_tree_shared_ptr(const vector<T> &els, KeyFunction<T> keyF) {
+  return shared_ptr<RangeSearchTree<T>>(new RangeSearchTree<T>(els, keyF));
+}
+
 
 
 #endif //GEO_PROJ_RANGESEARCHTREE_H

@@ -17,6 +17,25 @@ struct Point {
     return !(rhs == *this);
   }
 
+  bool operator<(const Point &rhs) const {
+    if (x < rhs.x)
+      return true;
+    if (rhs.x < x)
+      return false;
+    return y < rhs.y;
+  }
+
+  bool operator>(const Point &rhs) const {
+    return rhs < *this;
+  }
+
+  bool operator<=(const Point &rhs) const {
+    return !(rhs < *this);
+  }
+
+  bool operator>=(const Point &rhs) const {
+    return !(*this < rhs);
+  }
 
   Point(double x, double y) : x(x), y(y) {}
 
@@ -27,6 +46,10 @@ struct Point {
     return os;
   }
 };
+
+inline Point make_simple_point(double x, double y) {
+  return Point(x, y);
+}
 
 
 template <typename T>
@@ -47,12 +70,38 @@ struct PointWithData {
     return !(rhs == *this);
   }
 
+  bool operator<(const PointWithData &rhs) const {
+    if (point < rhs.point)
+      return true;
+    if (rhs.point < point)
+      return false;
+    return data < rhs.data;
+  }
+
+  bool operator>(const PointWithData &rhs) const {
+    return rhs < *this;
+  }
+
+  bool operator<=(const PointWithData &rhs) const {
+    return !(rhs < *this);
+  }
+
+  bool operator>=(const PointWithData &rhs) const {
+    return !(*this < rhs);
+  }
+
   friend std::ostream &operator<<(std::ostream &os, const PointWithData &data) {
     os << "point: (" << data.point << ") data: (" << data.data << ")";
     return os;
   }
 
 };
+
+
+template <typename T>
+inline PointWithData<T> make_point_with_data(const Point &point, T data) {
+  return PointWithData<T>(point, data);
+}
 
 
 #endif //GEO_PROJ_POINT_H

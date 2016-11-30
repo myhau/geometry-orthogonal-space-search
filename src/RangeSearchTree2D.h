@@ -6,22 +6,28 @@
 #include<vector>
 #include <algorithm>
 #include <boost/format.hpp>
+#include <memory>
 #include "Node.h"
 #include "Point.h"
 #include "SortedPoints.h"
 #include "RangeSearchTree.h"
+#include "Rect.h"
+
 
 using std::function;
 using std::vector;
 using std::set;
 using std::transform;
+using std::make_shared;
+using std::shared_ptr;
 
 template<typename T>
 class RangeSearchTree2D {
 private:
 
-  using KeyFunction = function<Point(const T&)>;
-  using NodePtr = Node<RangeSearchTree<PointWithData<T>>> *;
+  using KeyFunction = function<Point(const T &)>;
+  using NodeValue = shared_ptr<RangeSearchTree<PointWithData<T>>>;
+  using NodePtr = Node<NodeValue> *;
   using Vec = vector<T>;
   using Set = set<T>;
 
@@ -30,123 +36,146 @@ public:
   NodePtr tree;
 private:
 
-  NodePtr findVSplit(NodePtr tree, double from, double to) {
-    NodePtr subTree = tree;
-    while (!subTree->isLeaf && (subTree->key >= to || subTree->key < from)) {
-      if (subTree->key >= to) {
-        subTree = subTree->left;
-      } else {
-        subTree = subTree->right;
-      }
-    }
-
-    return subTree;
-  }
-
   NodePtr buildTree(const vector<T> &elements) {
     vector<PointWithData<T>> pointsWithData(elements.size());
-    auto f = [this](const T& data){ return PointWithData<T>(keyF(data), data);};
+    auto f = [this](const T &data) { return make_point_with_data(keyF(data), data); };
     transform(elements.begin(), elements.end(), pointsWithData.begin(), f);
 
-    auto sortedPoints = SortedPoints<T>(pointsWithData);
+    auto sortedPoints = make_sorted_points(pointsWithData);
 
     return buildSubTree(pointsWithData, 0, sortedPoints.size() - 1);
   }
 
-  NodePtr buildSubTree(const SortedPoints<T> &preSorted, long xBeg, long xEnd) {
+  NodePtr buildSubTree(const SortedPoints<T> &preSorted, size_t xBeg, size_t xEnd) {
 
 
-    if(xBeg > xEnd) {
+    if (xBeg > xEnd) {
       return nullptr;
     }
 
-    auto toYCoordMapper = [](const PointWithData<T>& pointAndData){return pointAndData.point.y;};
+    // TODO: probably can be moved somewhere else
+    auto toYCoordMapper = [](const PointWithData<T> &pointAndData) { return pointAndData.point.y; };
+    auto toXCoordMapper = [](const PointWithData<T> &pointAndData) { return pointAndData.point.x; };
 
-    auto toXCoordMapper = [](const PointWithData<T>& pointAndData){return pointAndData.point.x;};
-
-    if(xBeg == xEnd) {
+    if (xBeg == xEnd) {
       auto value = preSorted.getX(xBeg);
       vector<PointWithData<T>> values = {value};
-      return new Node<RangeSearchTree<PointWithData<T>>>(toXCoordMapper(value), RangeSearchTree<PointWithData<T>>(values, toYCoordMapper), true);
+      NodePtr node = make_node_ptr(toXCoordMapper(value),
+                                   make_range_search_tree_shared_ptr<PointWithData<T>>(values,
+                                                                                       toYCoordMapper), true);
+      return node;
     }
 
     auto associatedStructureData = preSorted.getAllY(xBeg, xEnd);
 
-    auto associatedStructure = RangeSearchTree<PointWithData<T>>(associatedStructureData, toYCoordMapper);
+    auto associatedStructure = make_range_search_tree_shared_ptr<PointWithData<T>>(associatedStructureData,
+                                                                                   toYCoordMapper);
 
-    auto medPos = xBeg + xEnd;
-    auto medianPosition = medPos / 2;
+    // TODO: probably we can simplify this code here
+    auto almostMedianPosition = xBeg + xEnd;
+    auto medianPosition = almostMedianPosition / 2;
+
+    auto nextIterationMiddleCandidate = medianPosition - 1;
     double median;
-
-
-    auto firstEndI = medianPosition - 1;
-
-    if (medPos % 2 == 0) {
-      median = toXCoordMapper(preSorted.getX(medPos));
-      firstEndI = medianPosition;
+    if (almostMedianPosition % 2 == 0) {
+      median = toXCoordMapper(preSorted.getX(medianPosition));
+      nextIterationMiddleCandidate = medianPosition;
     } else {
-      auto medVal1 = toXCoordMapper(preSorted.getX(medPos));
-      auto medVal2 = toXCoordMapper(preSorted.getX(medPos + 1));
-      median = medVal1 + medVal2;
-      if(medVal1 <= median) {
-        firstEndI = medianPosition;
+      auto medVal1 = toXCoordMapper(preSorted.getX(medianPosition));
+      auto medVal2 = toXCoordMapper(preSorted.getX(medianPosition + 1));
+      median = (medVal1 + medVal2)/2;
+      if (medVal1 <= median) {
+        nextIterationMiddleCandidate = medianPosition;
       }
-      if(medVal2 <= median) {
-        firstEndI = medianPosition + 1;
+      if (medVal2 <= median) {
+        nextIterationMiddleCandidate = medianPosition + 1;
       }
     }
 
-    auto medianNode = new Node<RangeSearchTree<PointWithData<T>>>(median, associatedStructure, false);
+    NodePtr medianNode = make_node_ptr(median, associatedStructure, false);
 
-    if (firstEndI >= xBeg) {
-      medianNode->left = buildSubTree(preSorted, xBeg, firstEndI);
-      medianNode->right = buildSubTree(preSorted, firstEndI + 1, xEnd);
+    if (nextIterationMiddleCandidate >= xBeg) {
+      // prevent infinite recursion
+      if (nextIterationMiddleCandidate != xEnd) {
+        medianNode->left = buildSubTree(preSorted, xBeg, nextIterationMiddleCandidate);
+      }
+      // probably also prevents infinite recursion
+      if (nextIterationMiddleCandidate + 1 != xBeg) {
+        medianNode->right = buildSubTree(preSorted, nextIterationMiddleCandidate + 1, xEnd);
+      }
     }
 
     return medianNode;
   }
 
+  NodePtr findVSplit(NodePtr tree, const Rect& area) const {
+    NodePtr subTree = tree;
+    while (!subTree->isLeaf && (subTree->key >= area.xTo || subTree->key < area.xFrom)) {
+      if (subTree->key >= area.xTo) {
+        subTree = subTree->left;
+      } else {
+        subTree = subTree->right;
+      }
+    }
+    return subTree;
+  }
+
+  enum VSplitSubtree {
+    LEFT, RIGHT
+  };
+
+  void collectAll(NodePtr tree, const Rect& area, VSplitSubtree subtrees, set<PointWithData<T>>& collector) const {
+
+  }
+
+  void collectFromAssociatedStructure(NodePtr tree, const Rect& area, set<PointWithData<T>>& collector) const {
+    auto yDimensionSearchTree = tree->value.get();
+    yDimensionSearchTree->search(area.yFrom, area.yTo, collector);
+  }
+
 public:
-
-
 
   RangeSearchTree2D(const vector<T> &els, KeyFunction keyF) :
           keyF(keyF),
           tree(buildTree(els)) {
   }
 
-  vector<T> search(double x1, double x2, double y1, double y2) const {
+  set<T> search(double fromX, double toX, double fromY, double toY) const {
+    return search(Rect(fromX, toX, fromY, toY));
+  }
 
-    if (x1 > x2) {
-      auto err = (boost::format("Invalid arguments x1, x2 from %s to %s") % x1 % x2).str();
+  set<T> search(const Rect& area) const {
+
+    if (area.xFrom > area.xTo) {
+      auto err = (boost::format("Invalid arguments fromX, toX from %s to %s") % area.xFrom % area.yTo).str();
       throw std::invalid_argument(err);
-    } else if(y1 > y2) {
-      auto err = (boost::format("Invalid arguments y1, y2 from %s to %s") % y1 % y2).str();
+    } else if (area.yFrom > area.yTo) {
+      auto err = (boost::format("Invalid arguments fromY, toY from %s to %s") % area.yFrom % area.yTo).str();
       throw std::invalid_argument(err);
     }
 
-//    NodePtr vSplitTree = findVSplit(tree, );
+    NodePtr vSplitTree = findVSplit(tree, area);
 
-    vector<T> collectTo;
+    set<PointWithData<T>> collectTo;
+    set<T> out;
 
-//    if(vSplitTree == nullptr) return collectTo;
-//
-//    if(vSplitTree->isLeaf && (vSplitTree->key >= keyFrom && vSplitTree->key <= keyTo)) {
-//      collectTo.insert(vSplitTree->value);
-//      return collectTo;
-//    } else {
-//      collectAll(vSplitTree, keyFrom, keyTo, LEFT, collectTo);
-//      collectAll(vSplitTree, keyFrom, keyTo, RIGHT, collectTo);
-//    }
+    if(vSplitTree == nullptr) return out;
 
-    return collectTo;
+    collectAll(vSplitTree, area, LEFT, collectTo);
+    collectAll(vSplitTree, area, RIGHT, collectTo);
+
+    for (auto &&item : collectTo) {
+      out.insert(item.data);
+    }
+
+    return out;
   }
+
 
   virtual ~RangeSearchTree2D() {
     destruct(tree);
   }
 };
-
 
 
 #endif //GEO_PROJ_RANGESEARCHTREE2D_H

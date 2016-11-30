@@ -19,7 +19,7 @@ include_directories(libs)
 include_directories(cget/include)
 include_directories(${Boost_INCLUDE_DIR})
 
-add_executable(range_tree ${SOURCE_FILES} src/util/PrintUtil.h src/util/Functions.h)
+add_executable(range_tree ${SOURCE_FILES} src/Rect.h)
 add_executable(test_range_tree ${TEST_FILES} )
 
 target_link_libraries(range_tree ${Boost_LIBRARIES})

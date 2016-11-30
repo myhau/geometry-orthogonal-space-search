@@ -63,6 +63,10 @@ int _print_t(Node<T> *tree, int is_left, int offset, int depth, char s[20][255])
 template <typename T>
 void prettyPrint(Node<T> *tree)
 {
+  if(tree == nullptr) {
+    printf("%s\n", "Tree-is-nullptr");
+    return;
+  }
   char s[20][255];
   for (int i = 0; i < 20; i++)
     sprintf(s[i], "%80s", " ");

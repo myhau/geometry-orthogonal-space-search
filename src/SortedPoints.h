@@ -86,4 +86,9 @@ public:
 };
 
 
+template<typename T>
+SortedPoints<T> make_sorted_points(const vector<PointWithData<T>> &points) {
+  return SortedPoints<T>(points);
+}
+
 #endif //GEO_PROJ_SORTEDPOINTS_H
