@@ -3,6 +3,7 @@
 #include <vector>
 #include "../src/SortedPoints.h"
 #include "../src/Point.h"
+#include "../src/util/SetToString.h"
 
 using namespace std;
 

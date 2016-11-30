@@ -124,8 +124,46 @@ private:
     LEFT, RIGHT
   };
 
-  void collectAll(NodePtr tree, const Rect& area, VSplitSubtree subtrees, set<PointWithData<T>>& collector) const {
+  void collectAll(NodePtr tree, const Rect& area, VSplitSubtree subtreeType, set<PointWithData<T>>& collector) const {
 
+    if(tree == nullptr) return;
+
+    collectFromAssociatedStructure(tree, area, collector);
+
+    NodePtr iterNode;
+
+    if(subtreeType == LEFT) {
+      iterNode = tree->left;
+    } else {
+      iterNode = tree->right;
+    }
+
+    if(iterNode == nullptr) return;
+
+    // FIXME: should we do something with leaf ?
+
+    while(iterNode != nullptr) {
+      if(subtreeType == LEFT) {
+
+        if(iterNode->key >= area.xFrom) {
+          // FIXME: should we collecto from iterNode->right or iterNode ?
+          collectFromAssociatedStructure(iterNode, area, collector);
+          iterNode = iterNode->left;
+        } else {
+          iterNode = iterNode->right;
+        }
+
+      } else {
+
+        if(iterNode->key <= area.xTo) {
+          collectFromAssociatedStructure(iterNode, area, collector);
+          iterNode = iterNode->right;
+        } else {
+          iterNode = iterNode->left;
+        }
+
+      }
+    }
   }
 
   void collectFromAssociatedStructure(NodePtr tree, const Rect& area, set<PointWithData<T>>& collector) const {
@@ -156,15 +194,15 @@ public:
 
     NodePtr vSplitTree = findVSplit(tree, area);
 
-    set<PointWithData<T>> collectTo;
+    set<PointWithData<T>> collector;
     set<T> out;
 
     if(vSplitTree == nullptr) return out;
 
-    collectAll(vSplitTree, area, LEFT, collectTo);
-    collectAll(vSplitTree, area, RIGHT, collectTo);
+    collectAll(vSplitTree, area, LEFT, collector);
+    collectAll(vSplitTree, area, RIGHT, collector);
 
-    for (auto &&item : collectTo) {
+    for (auto &&item : collector) {
       out.insert(item.data);
     }
 

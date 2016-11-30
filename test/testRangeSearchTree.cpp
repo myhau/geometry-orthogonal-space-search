@@ -4,7 +4,7 @@
 #include "catch.hpp"
 #include "../src/RangeSearchTree.h"
 #include <vector>
-
+#include "../src/util/SetToString.h"
 
 using namespace std;
 

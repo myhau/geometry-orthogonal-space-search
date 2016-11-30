@@ -112,12 +112,12 @@ private:
     LEFT, RIGHT
   };
 
-  void collectAll(NodePtr root, double from, double to, VSplitSubtree subtree, Set &collectTo) const {
+  void collectAll(NodePtr root, double from, double to, VSplitSubtree subtreeType, Set &collector) const {
     if (root == nullptr) return;
 
     NodePtr iterNode;
 
-    if (subtree == LEFT) {
+    if (subtreeType == LEFT) {
       iterNode = root->left;
     } else {
       iterNode = root->right;
@@ -125,14 +125,14 @@ private:
 
     if (iterNode == nullptr) return;
     if (iterNode->isLeaf) {
-      if (iterNode->key >= from && iterNode->key <= to) collectWholeSubTree(iterNode, collectTo);
+      if (iterNode->key >= from && iterNode->key <= to) collectWholeSubTree(iterNode, collector);
     }
 
     while (iterNode != nullptr) {
-      if (subtree == LEFT) {
+      if (subtreeType == LEFT) {
 
         if (iterNode->key >= from) {
-          collectWholeSubTree(iterNode->right, iterNode, collectTo);
+          collectWholeSubTree(iterNode->right, iterNode, collector);
           iterNode = iterNode->left;
         } else {
           iterNode = iterNode->right;
@@ -141,7 +141,7 @@ private:
       } else {
 
         if (iterNode->key <= to) {
-          collectWholeSubTree(iterNode->left, iterNode, collectTo);
+          collectWholeSubTree(iterNode->left, iterNode, collector);
           iterNode = iterNode->right;
         } else {
           iterNode = iterNode->left;
@@ -183,12 +183,12 @@ public:
 
 
   Set search(double keyFrom, double keyTo) const {
-    Set collectTo;
-    search(keyFrom, keyTo, collectTo);
-    return collectTo;
+    Set collector;
+    search(keyFrom, keyTo, collector);
+    return collector;
   }
 
-  void search(double keyFrom, double keyTo, set<T>& collectorSet) const {
+  void search(double keyFrom, double keyTo, set<T>& collector) const {
     if (keyFrom > keyTo) {
       auto err = (boost::format("Invalid arguments from %s to %s") % keyFrom % keyTo).str();
       throw std::invalid_argument(err);
@@ -199,10 +199,10 @@ public:
     if (vSplitTree == nullptr) return;
 
     if (vSplitTree->isLeaf && (vSplitTree->key >= keyFrom && vSplitTree->key <= keyTo)) {
-      collectorSet.insert(vSplitTree->value);
+      collector.insert(vSplitTree->value);
     } else {
-      collectAll(vSplitTree, keyFrom, keyTo, LEFT, collectorSet);
-      collectAll(vSplitTree, keyFrom, keyTo, RIGHT, collectorSet);
+      collectAll(vSplitTree, keyFrom, keyTo, LEFT, collector);
+      collectAll(vSplitTree, keyFrom, keyTo, RIGHT, collector);
     }
   }
 

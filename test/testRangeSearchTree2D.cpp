@@ -5,7 +5,8 @@
 #include <vector>
 #include <set>
 #include <catch.hpp>
-
+#include <sstream>
+#include "../src/util/SetToString.h"
 
 using namespace std;
 
@@ -31,7 +32,8 @@ TEST_CASE("range search 2D tree simple cases") {
     set<Point> expected = set<Point>(singleVec.begin(), singleVec.end());
     RangeSearchTree2D<Point> singleSearchTree(singleVec, pointKeyFunc);
 
-    REQUIRE(singleSearchTree.search(1, 2, 1, 2) == expected);
+
+    REQUIRE(singleSearchTree.search(0, 2, -1, 30) == expected);
 
 //    REQUIRE(singleSearchTree.search(1, 2, 2, 3) == expected);
 //
@@ -49,6 +51,7 @@ TEST_CASE("range search 2D tree simple cases") {
     set<Point> expected = set<Point>();
 
     expected.insert(Point(12, 3));
+    expected.insert(Point(11, 2));
 
     RangeSearchTree2D<Point> searchTreeWithNoXYdup(inputVecWithNoXYdup, pointKeyFunc);
     prettyPrint(searchTreeWithNoXYdup.tree);

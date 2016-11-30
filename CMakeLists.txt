@@ -5,8 +5,8 @@ project(geo_proj)
 #set(CMAKE_CXX_COMPILER /usr/local/Cellar/gcc/6.2.0/bin/g++-6)
 set(CMAKE_CXX_STANDARD 14)
 
-file(GLOB SOURCE_FILES src/*.h src/main.cpp)
-file(GLOB TEST_FILES test/*.h test/*.cpp src/*.h)
+file(GLOB SOURCE_FILES src/*.h src/util/*.cpp src/main.cpp)
+file(GLOB TEST_FILES test/*.h src/util/*.cpp test/*.cpp src/*.h)
 
 find_package(Boost)
 #
@@ -19,7 +19,7 @@ include_directories(libs)
 include_directories(cget/include)
 include_directories(${Boost_INCLUDE_DIR})
 
-add_executable(range_tree ${SOURCE_FILES} src/Rect.h)
+add_executable(range_tree ${SOURCE_FILES})
 add_executable(test_range_tree ${TEST_FILES} )
 
 target_link_libraries(range_tree ${Boost_LIBRARIES})
