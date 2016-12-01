@@ -154,7 +154,7 @@ private:
 
   NodePtr findVSplit(NodePtr tree, double from, double to) const {
     NodePtr subTree = tree;
-    while (!subTree->isLeaf && (subTree->key >= to || subTree->key < from)) {
+    while (subTree != nullptr && !subTree->isLeaf && (subTree->key >= to || subTree->key < from)) {
       if (subTree->key >= to) {
         subTree = subTree->left;
       } else {

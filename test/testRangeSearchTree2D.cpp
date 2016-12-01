@@ -77,16 +77,15 @@ TEST_CASE("range search 2D tree simple cases") {
     REQUIRE(searchTreeWithNoXYDup.search(11, 13, 2, 4) == expected);
   }
 
-  SECTION("works for duplicate x or y coord") {
+  SECTION("regression, works some points") {
     vector<Point> inputVecWithNoXYdup = {
-            Point(12, 2), Point(12, 3), Point(12, 4), Point(5, 70), Point(5, 3), Point(3, 3), Point(1, 70)
+            Point(12, 2), Point(11, 3), Point(13, 4), Point(5, 70), Point(5, 100), Point(3, 101), Point(1, 70)
     };
 
     set<Point> expected = set<Point>();
 
-    expected.insert(Point(12, 3));
-    expected.insert(Point(12, 4));
-    expected.insert(Point(5, 3));
+    expected.insert(Point(13, 4));
+    expected.insert(Point(11, 3));
 
     RangeSearchTree2D<Point> searchTreeWithXYDups(inputVecWithNoXYdup, pointKeyFunc);
     prettyPrint(searchTreeWithXYDups.tree);
