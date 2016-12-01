@@ -194,6 +194,8 @@ public:
       throw std::invalid_argument(err);
     }
 
+    if(tree == nullptr) return;
+
     NodePtr vSplitTree = findVSplit(tree, keyFrom, keyTo);
 
     if (vSplitTree == nullptr) return;
@@ -206,6 +208,11 @@ public:
     }
   }
 
+
+  friend std::ostream &operator<<(std::ostream &os, const RangeSearchTree &tree) {
+    prettyPrint(os, tree.tree);
+    return os;
+  }
 
   virtual ~RangeSearchTree() {
     destruct(tree);

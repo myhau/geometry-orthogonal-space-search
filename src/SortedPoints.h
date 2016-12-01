@@ -15,7 +15,7 @@ class SortedPoints {
 private:
   vector<size_t> xSortedIndexes;
   vector<size_t> ySortedIndexes;
-  vector<size_t> reverseXIndex;
+  vector<size_t> reverseYIndex;
   vector<PointWithData<T>> points;
 
   function<int(const size_t &, const size_t &)>
@@ -48,7 +48,7 @@ public:
               pointComparator([](const Point &p) { return p.y; }));
 
 
-    reverseXIndex = transposeVector(xSortedIndexes);
+    reverseYIndex = transposeVector(ySortedIndexes);
   }
 
 
@@ -68,7 +68,7 @@ public:
     set<size_t> mappedToYIndexes;
 
     for (auto& index: subIndexes) {
-      mappedToYIndexes.insert(ySortedIndexes[reverseXIndex[index]]);
+      mappedToYIndexes.insert(ySortedIndexes[reverseYIndex[index]]);
     }
 
     vector<PointWithData<T>> out;

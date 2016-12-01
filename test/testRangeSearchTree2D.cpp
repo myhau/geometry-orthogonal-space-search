@@ -26,7 +26,7 @@ TEST_CASE("range search 2D tree simple cases") {
 
 
   SECTION("works for single point") {
-    prettyPrint(searchTree.tree);
+    prettyPrint(cout, searchTree.tree);
     const Point singlePoint = Point(1.0, 2.0);
     vector<Point> singleVec = {singlePoint};
     set<Point> expected = set<Point>(singleVec.begin(), singleVec.end());
@@ -58,6 +58,41 @@ TEST_CASE("range search 2D tree simple cases") {
 
 
     REQUIRE(searchTreeWithNoXYdup.search(11, 13, 2, 4) == expected);
+  }
+
+  SECTION("works for non duplicate x or y coord, weird case") {
+    vector<Point> inputVecWithNoXYdup = {
+            Point(11, 2), Point(12, 3), Point(4, 123), Point(13, 0), Point(10, 10), Point(5, 5)
+    };
+
+    set<Point> expected = set<Point>();
+
+    expected.insert(Point(12, 3));
+    expected.insert(Point(11, 2));
+
+    RangeSearchTree2D<Point> searchTreeWithNoXYDup(inputVecWithNoXYdup, pointKeyFunc);
+    prettyPrint(searchTreeWithNoXYDup.tree);
+
+
+    REQUIRE(searchTreeWithNoXYDup.search(11, 13, 2, 4) == expected);
+  }
+
+  SECTION("works for duplicate x or y coord") {
+    vector<Point> inputVecWithNoXYdup = {
+            Point(12, 2), Point(12, 3), Point(12, 4), Point(5, 70), Point(5, 3), Point(3, 3), Point(1, 70)
+    };
+
+    set<Point> expected = set<Point>();
+
+    expected.insert(Point(12, 3));
+    expected.insert(Point(12, 4));
+    expected.insert(Point(5, 3));
+
+    RangeSearchTree2D<Point> searchTreeWithXYDups(inputVecWithNoXYdup, pointKeyFunc);
+    prettyPrint(searchTreeWithXYDups.tree);
+
+
+    REQUIRE(searchTreeWithXYDups.search(4, 13, 2.5, 5) == expected);
   }
 
 }

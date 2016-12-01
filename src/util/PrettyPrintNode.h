@@ -2,7 +2,9 @@
 #define GEO_PROJ_PRETTYPRINTNODE_H
 
 #include <cstdio>
+#include <iostream>
 #include "../Node.h"
+using namespace std;
 
 template<typename T>
 int _print_t(Node<T> *tree, int is_left, int offset, int depth, char s[20][255])
@@ -61,10 +63,10 @@ int _print_t(Node<T> *tree, int is_left, int offset, int depth, char s[20][255])
 }
 
 template <typename T>
-void prettyPrint(Node<T> *tree)
+void prettyPrint(std::ostream &os, Node<T> *tree)
 {
   if(tree == nullptr) {
-    printf("%s\n", "Tree-is-nullptr");
+    os << "Tree-is-nullptr" << endl;
     return;
   }
   char s[20][255];
@@ -74,7 +76,13 @@ void prettyPrint(Node<T> *tree)
   _print_t(tree, 0, 0, 0, s);
 
   for (int i = 0; i < 20; i++)
-    printf("%s\n", s[i]);
+    os << string(s[i]) << endl;
+}
+
+template <typename T>
+void prettyPrint(Node<T> *tree)
+{
+  prettyPrint(cout, tree);
 }
 
 #endif //GEO_PROJ_PRETTYPRINTNODE_H

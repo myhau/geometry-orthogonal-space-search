@@ -167,7 +167,9 @@ private:
   }
 
   void collectFromAssociatedStructure(NodePtr tree, const Rect& area, set<PointWithData<T>>& collector) const {
+    cout << "Tree for " << tree->key << ":" << endl;
     auto yDimensionSearchTree = tree->value.get();
+    cout << *yDimensionSearchTree << endl;
     yDimensionSearchTree->search(area.yFrom, area.yTo, collector);
   }
 
@@ -192,12 +194,14 @@ public:
       throw std::invalid_argument(err);
     }
 
-    NodePtr vSplitTree = findVSplit(tree, area);
-
-    set<PointWithData<T>> collector;
     set<T> out;
 
+    if(tree == nullptr) return out;
+
+    NodePtr vSplitTree = findVSplit(tree, area);
     if(vSplitTree == nullptr) return out;
+
+    set<PointWithData<T>> collector;
 
     collectAll(vSplitTree, area, LEFT, collector);
     collectAll(vSplitTree, area, RIGHT, collector);

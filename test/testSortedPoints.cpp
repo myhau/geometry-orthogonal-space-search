@@ -39,4 +39,21 @@ TEST_CASE("sorted points should work") {
     REQUIRE(expected == actual);
   }
 
+  SECTION("test ") {
+    vector<Point> points = {Point(11, 2), Point(12, 3), Point(4, 123), Point(13, 0), Point(10, 10), Point(5, 5)};
+
+    vector<PointWithData<double>> pointsWithWhateverData;
+
+    for (auto &&item : points) {
+      pointsWithWhateverData.push_back(make_point_with_data(item, item.x));
+    }
+
+    auto sortedPoints2 = make_sorted_points(pointsWithWhateverData);
+
+    vector<PointWithData<double>> expected = {pointsWithWhateverData[0], pointsWithWhateverData[1]};
+
+    REQUIRE(sortedPoints2.getAllY(3, 4) == expected);
+
+  }
+
 }
