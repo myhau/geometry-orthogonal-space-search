@@ -37,7 +37,25 @@ struct Point {
     return !(*this < rhs);
   }
 
+  Point operator+(const Point &rhs) const {
+    return Point(x + rhs.x, y + rhs.y);
+  }
+
+  Point operator-() const {
+    return Point(-x, -y);
+  }
+
+  Point operator-(const Point& rhs) const {
+    return Point(x - rhs.x, y - rhs.y);
+  }
+
+  Point operator*(double r) const {
+    return Point(x * r, y * r);
+  }
+
   Point(double x, double y) : x(x), y(y) {}
+
+  Point(double xy[2]) : x(xy[0]), y(xy[1]) {}
 
   Point() {}
 
@@ -52,7 +70,7 @@ inline Point make_simple_point(double x, double y) {
 }
 
 
-template <typename T>
+template<typename T>
 struct PointWithData {
   Point point;
   T data;
@@ -98,7 +116,7 @@ struct PointWithData {
 };
 
 
-template <typename T>
+template<typename T>
 inline PointWithData<T> make_point_with_data(const Point &point, T data) {
   return PointWithData<T>(point, data);
 }

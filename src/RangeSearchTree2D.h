@@ -21,6 +21,7 @@ using std::transform;
 using std::make_shared;
 using std::shared_ptr;
 
+
 template<typename T>
 class RangeSearchTree2D {
 private:
@@ -83,7 +84,7 @@ private:
     } else {
       auto medVal1 = toXCoordMapper(preSorted.getX(medianPosition));
       auto medVal2 = toXCoordMapper(preSorted.getX(medianPosition + 1));
-      median = (medVal1 + medVal2)/2;
+      median = (medVal1 + medVal2) / 2;
       if (medVal1 <= median) {
         nextIterationMiddleCandidate = medianPosition;
       }
@@ -108,7 +109,7 @@ private:
     return medianNode;
   }
 
-  NodePtr findVSplit(NodePtr tree, const Rect& area) const {
+  NodePtr findVSplit(NodePtr tree, const Rect &area) const {
     NodePtr subTree = tree;
     while (!subTree->isLeaf && (subTree->key >= area.xTo || subTree->key < area.xFrom)) {
       if (subTree->key >= area.xTo) {
@@ -124,28 +125,29 @@ private:
     LEFT, RIGHT
   };
 
-  void collectAll(NodePtr tree, const Rect& area, VSplitSubtree subtreeType, set<PointWithData<T>>& collector) const {
+  void collectAll(NodePtr tree, const Rect &area, VSplitSubtree subtreeType,
+                  set<PointWithData<T>> &collector) const {
 
-    if(tree == nullptr) return;
+    if (tree == nullptr) return;
 
     collectFromAssociatedStructure(tree, area, collector);
 
     NodePtr iterNode;
 
-    if(subtreeType == LEFT) {
+    if (subtreeType == LEFT) {
       iterNode = tree->left;
     } else {
       iterNode = tree->right;
     }
 
-    if(iterNode == nullptr) return;
+    if (iterNode == nullptr) return;
 
     // FIXME: should we do something with leaf ?
 
-    while(iterNode != nullptr) {
-      if(subtreeType == LEFT) {
+    while (iterNode != nullptr) {
+      if (subtreeType == LEFT) {
 
-        if(iterNode->key >= area.xFrom) {
+        if (iterNode->key >= area.xFrom) {
           // FIXME: should we collecto from iterNode->right or iterNode ?
           collectFromAssociatedStructure(iterNode, area, collector);
           iterNode = iterNode->left;
@@ -155,7 +157,7 @@ private:
 
       } else {
 
-        if(iterNode->key <= area.xTo) {
+        if (iterNode->key <= area.xTo) {
           collectFromAssociatedStructure(iterNode, area, collector);
           iterNode = iterNode->right;
         } else {
@@ -166,14 +168,15 @@ private:
     }
   }
 
-  void collectFromAssociatedStructure(NodePtr tree, const Rect& area, set<PointWithData<T>>& collector) const {
-    cout << "Tree for " << tree->key << ":" << endl;
+  void
+  collectFromAssociatedStructure(NodePtr tree, const Rect &area, set<PointWithData<T>> &collector) const {
     auto yDimensionSearchTree = tree->value.get();
-    cout << *yDimensionSearchTree << endl;
     yDimensionSearchTree->search(area.yFrom, area.yTo, collector);
   }
 
 public:
+
+
 
   RangeSearchTree2D(const vector<T> &els, KeyFunction keyF) :
           keyF(keyF),
@@ -184,7 +187,7 @@ public:
     return search(Rect(fromX, toX, fromY, toY));
   }
 
-  set<T> search(const Rect& area) const {
+  set<T> search(const Rect &area) const {
 
     if (area.xFrom > area.xTo) {
       auto err = (boost::format("Invalid arguments fromX, toX from %s to %s") % area.xFrom % area.yTo).str();
@@ -196,10 +199,10 @@ public:
 
     set<T> out;
 
-    if(tree == nullptr) return out;
+    if (tree == nullptr) return out;
 
     NodePtr vSplitTree = findVSplit(tree, area);
-    if(vSplitTree == nullptr) return out;
+    if (vSplitTree == nullptr) return out;
 
     set<PointWithData<T>> collector;
 
@@ -218,6 +221,10 @@ public:
     destruct(tree);
   }
 };
+
+static RangeSearchTree2D<Point> searchTreeOfPoints(const vector<Point> &els) {
+  return RangeSearchTree2D<Point>(els, [](const Point &a) { return a; });
+}
 
 
 #endif //GEO_PROJ_RANGESEARCHTREE2D_H
