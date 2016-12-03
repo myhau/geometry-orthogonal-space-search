@@ -38,6 +38,7 @@ public:
 private:
 
   NodePtr buildTree(const vector<T> &elements) {
+    if(elements.empty()) return nullptr;
     vector<PointWithData<T>> pointsWithData(elements.size());
     auto f = [this](const T &data) { return make_point_with_data(keyF(data), data); };
     transform(elements.begin(), elements.end(), pointsWithData.begin(), f);

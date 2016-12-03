@@ -3,6 +3,15 @@
 
 // TODO: use some c++ template mechanism to deduplicate that
 
+ostream& operator << ( ostream& os, vector<Point> const& values ) {
+  os << "{";
+  for (auto &&item :values) {
+    os << item << ",";
+  }
+  os << "}";
+
+  return os;
+}
 
 ostream& operator << ( ostream& os, set<Point> const& values ) {
   os << "{";

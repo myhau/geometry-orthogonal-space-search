@@ -2,6 +2,8 @@
 #define GEO_PROJ_RECT_H
 
 
+#include <ostream>
+
 struct Rect {
   double yFrom;
   double yTo;
@@ -15,6 +17,11 @@ struct Rect {
     xTo = max(p1.x, p2.x);
     yFrom = min(p1.y, p2.y);
     yTo = max(p1.y, p2.y);
+  }
+
+  friend ostream &operator<<(ostream &os, const Rect &rect) {
+    os << " xFrom: " << rect.xFrom << " xTo: " << rect.xTo << "yFrom: " << rect.yFrom << " yTo: " << rect.yTo;
+    return os;
   }
 };
 

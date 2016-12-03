@@ -85,6 +85,7 @@ private:
   }
 
   NodePtr buildTree(const Vec &elements) {
+    if(elements.empty()) return nullptr;
     Vec sortedVec(elements);
     std::sort(sortedVec.begin(), sortedVec.end(), [this](const T &p1, const T &p2) {return keyF(p2) > keyF(p1);});
 
@@ -173,13 +174,6 @@ public:
   }
 
   RangeSearchTree() : keyF([](T a) { return 0.0; }), tree(nullptr) {}
-
-
-//  RangeSearchTree(const vector<T>& els, function<double(T*)> keyF) {
-//    vec vec2(els.size());
-//    std::transform(els.begin(), els.end(), vec2.begin(), [](T& a) -> T* { return &a; });
-//    RangeSearchTree(vec2, keyF);
-//  }
 
 
   Set search(double keyFrom, double keyTo) const {

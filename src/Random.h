@@ -16,6 +16,26 @@ uniform_real_distribution<double> angleDistribution(0, 2 * M_PI);
 class Random {
 public:
 
+  static Point randomPoint(const Rect& insideRect) {
+    return randomPoints(insideRect, 1)[0];
+  }
+
+  static vector<Point> randomPoints(const Rect& insideRect, int count) {
+    uniform_real_distribution<double> xDistribution(insideRect.xFrom, insideRect.xTo);
+    uniform_real_distribution<double> yDistribution(insideRect.yFrom, insideRect.yTo);
+
+    vector<Point> points;
+
+    for (int i = 0; i < count; ++i) {
+      points.push_back(Point(xDistribution(generator), yDistribution(generator)));
+    }
+    return points;
+  }
+
+  static Rect randomRect(const Rect& insideRect) {
+    return Rect(randomPoint(insideRect), randomPoint(insideRect));
+  }
+
   inline static vector<Point> randomPointsOnCircle(Point center, double r, int count) {
 
     vector<Point> out;

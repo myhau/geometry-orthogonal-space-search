@@ -11,6 +11,8 @@
 #include "../src/util/Vectors.h"
 #include "../src/util/BitmapToProblem.h"
 #include "../src/util/TreeUtils.h"
+#include "../src/SimpleSearchAlgo2D.h"
+
 
 using namespace std;
 
@@ -241,6 +243,38 @@ TEST_CASE("range search 2D tree simple cases") {
 
     REQUIRE(searchTreeOnRect.search(9.0, 21.0, 9.0, 55.0) == expected);
     REQUIRE(searchTreeOnRect.search(-10000.0, 12312.0, -1000.00, 1000.0) == expected);
+  }
+
+}
+
+
+TEST_CASE("test a lot of random cases by comparing results with simple algorithm that 100% works") {
+
+  auto N = 10000;
+  auto EACH_COUNT_MULT = 1;
+
+  for (int i = 0; N > i; i++) {
+    auto pointCount = EACH_COUNT_MULT * i;
+    stringstream sectionName;
+    sectionName << "should work for i: " << i << " point count: " << pointCount;
+    SECTION(sectionName.str()) {
+      auto rect = Rect(Point(-100, -100), Point(100, 100));
+
+      auto points = Random::randomPoints(rect, pointCount);
+      auto searchRect = Random::randomRect(rect);
+
+      INFO("max rect is " << rect);
+      INFO("search rect is " << searchRect);
+      INFO("input points are " << points);
+
+      auto simpleSearch = SimpleSearchAlgo2D(points);
+      auto treeUnderTest = searchTreeOfPoints(points);
+
+      auto expectedPoints = simpleSearch.search(searchRect);
+      auto actualPoints = treeUnderTest.search(searchRect);
+
+      REQUIRE(expectedPoints == actualPoints);
+    }
   }
 
 }
