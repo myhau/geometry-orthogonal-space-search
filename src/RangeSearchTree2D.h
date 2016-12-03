@@ -26,9 +26,11 @@ template<typename T>
 class RangeSearchTree2D {
 private:
 
-  using KeyFunction = function<Point(const T &)>;
-  using NodeValue = shared_ptr<RangeSearchTree<PointWithData<T>>>;
-  using NodePtr = Node<NodeValue> *;
+  using C = ComparableTuple;
+  using KeyFunction = function<Point<double>(const T &)>;
+  using TreePointWithData = PointWithData<T, C>;
+  using NodeValue = shared_ptr<RangeSearchTree<TreePointWithData, C>>;
+  using NodePtr = Node<NodeValue, C> *;
   using Vec = vector<T>;
   using Set = set<T>;
 
@@ -40,8 +42,8 @@ private:
   NodePtr buildTree(const vector<T> &elements) {
     if (elements.empty()) return nullptr;
 
-    vector<PointWithData<T>> pointsWithData(elements.size());
-    auto f = [this](const T &data) { return make_point_with_data(keyF(data), data); };
+    vector<TreePointWithData> pointsWithData(elements.size());
+    auto f = [this](const T &data) { return make_point_with_data(toUniquePoint(keyF(data)), data); };
     transform(elements.begin(), elements.end(), pointsWithData.begin(), f);
 
     auto sortedPoints = make_sorted_points(pointsWithData);
@@ -49,7 +51,7 @@ private:
     return buildSubTree(pointsWithData, 0, sortedPoints.size() - 1);
   }
 
-  NodePtr buildSubTree(const SortedPoints<T> &preSorted, size_t xBeg, size_t xEnd) {
+  NodePtr buildSubTree(const SortedPoints<T, C> &preSorted, size_t xBeg, size_t xEnd) {
 
     if (xBeg > xEnd) {
       return nullptr;
@@ -57,11 +59,11 @@ private:
 
     if (xBeg == xEnd) {
       auto value = preSorted.getX(xBeg);
-      vector<PointWithData<T>> values = {value};
+      vector<TreePointWithData> values = {value};
       NodePtr node =
               make_node_ptr(
                       getX(value),
-                      make_range_search_tree_shared_ptr<PointWithData<T>>(values, getY<T>, true),
+                      make_range_search_tree_shared_ptr<TreePointWithData, ComparableTuple>(values, getY<T, C>, true),
                       true
               );
 
@@ -70,9 +72,9 @@ private:
 
     auto associatedStructureData = preSorted.getAllY(xBeg, xEnd);
     auto associatedStructure =
-            make_range_search_tree_shared_ptr<PointWithData<T>>(
+            make_range_search_tree_shared_ptr<TreePointWithData, ComparableTuple>(
                     associatedStructureData,
-                    getY<T>,
+                    getY<T, C>,
                     true
             );
 
@@ -81,14 +83,14 @@ private:
     auto medianPosition = almostMedianPosition / 2;
 
     auto nextIterationMiddleCandidate = medianPosition - 1;
-    double median;
+    C median;
     if (almostMedianPosition % 2 == 0) {
       median = getX(preSorted.getX(medianPosition));
       nextIterationMiddleCandidate = medianPosition;
     } else {
       auto medVal1 = getX(preSorted.getX(medianPosition));
       auto medVal2 = getX(preSorted.getX(medianPosition + 1));
-      median = (medVal1 + medVal2) / 2;
+      median = (medVal1 + medVal2) / 2.0;
       if (medVal1 <= median) {
         nextIterationMiddleCandidate = medianPosition;
       }
@@ -110,7 +112,7 @@ private:
     return medianNode;
   }
 
-  NodePtr findVSplit(NodePtr tree, const Rect &area) const {
+  NodePtr findVSplit(NodePtr tree, const Rect<C> &area) const {
     NodePtr subTree = tree;
     while (!subTree->isLeaf && (subTree->key >= area.xTo || subTree->key < area.xFrom)) {
       if (subTree->key >= area.xTo) {
@@ -126,8 +128,8 @@ private:
     LEFT, RIGHT
   };
 
-  void collectAll(NodePtr tree, const Rect &area, VSplitSubtree subtreeType,
-                  set<PointWithData<T>> &collector) const {
+  void collectAll(NodePtr tree, const Rect<C> &area, VSplitSubtree subtreeType,
+                  set<TreePointWithData> &collector) const {
 
     NodePtr iterNode;
 
@@ -165,25 +167,13 @@ private:
   }
 
   void
-  collectFromAssociatedStructure(NodePtr tree, const Rect &area, set<PointWithData<T>> &collector) const {
+  collectFromAssociatedStructure(NodePtr tree, const Rect<C> &area, set<TreePointWithData> &collector) const {
     if (tree == nullptr) return;
     auto yDimensionSearchTree = tree->value.get();
     yDimensionSearchTree->search(area.yFrom, area.yTo, collector);
   }
 
-public:
-
-
-  RangeSearchTree2D(const vector<T> &els, KeyFunction keyF) :
-          keyF(keyF),
-          tree(buildTree(els)) {
-  }
-
-  set<T> search(double fromX, double toX, double fromY, double toY) const {
-    return search(Rect(fromX, toX, fromY, toY));
-  }
-
-  set<T> search(const Rect &area) const {
+  set<T> search(const Rect<ComparableTuple> &area) const {
 
     if (area.xFrom > area.xTo) {
       auto err = (boost::format("Invalid arguments fromX, toX from %s to %s") % area.xFrom % area.yTo).str();
@@ -200,10 +190,10 @@ public:
     NodePtr vSplitTree = findVSplit(tree, area);
     if (vSplitTree == nullptr) return out;
 
-    set<PointWithData<T>> collector;
+    set<TreePointWithData> collector;
 
     if (vSplitTree->isLeaf) {
-      if(area.xFrom <= vSplitTree->key && vSplitTree->key <= area.xTo) {
+      if (area.xFrom <= vSplitTree->key && vSplitTree->key <= area.xTo) {
         collectFromAssociatedStructure(vSplitTree, area, collector);
       }
     } else {
@@ -219,14 +209,37 @@ public:
   }
 
 
+public:
+
+
+  RangeSearchTree2D(const vector<T> &els, KeyFunction keyF) :
+          keyF(keyF),
+          tree(buildTree(els)) {
+  }
+
+  set<T> search(double fromX, double toX, double fromY, double toY) const {
+    return search(make_rect(point(fromX, fromY), point(toX, toY)));
+  }
+
+  set<T> search(const Rect<> &r) const {
+    double inf = numeric_limits<double>::infinity();
+    return search(
+            make_rect(
+                    point(ComparableTuple(r.xFrom, -inf), ComparableTuple(r.yFrom, -inf)),
+                    point(ComparableTuple(r.xTo, inf), ComparableTuple(r.yTo, inf))
+            )
+    );
+  }
+
   virtual ~RangeSearchTree2D() {
     destruct(tree);
   }
 
 };
 
-static RangeSearchTree2D<Point> searchTreeOfPoints(const vector<Point> &els) {
-  return RangeSearchTree2D<Point>(els, [](const Point &a) { return a; });
+
+static auto searchTreeOfPoints(const vector<Point<>> &els) {
+  return RangeSearchTree2D<Point<>>(els, [](const Point<> &a) { return a; });
 }
 
 

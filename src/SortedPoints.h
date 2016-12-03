@@ -10,16 +10,16 @@
 
 using namespace std;
 
-template<typename T>
+template<typename T, typename C = double>
 class SortedPoints {
 private:
   vector<size_t> xSortedIndexes;
   vector<size_t> ySortedIndexes;
   vector<size_t> reverseYIndex;
-  vector<PointWithData<T>> points;
+  vector<PointWithData<T, C>> points;
 
   function<int(const size_t &, const size_t &)>
-  pointComparator(function<double(const Point &)> f) {
+  pointComparator(function<C(const Point<C> &)> f) {
     return [this, f](const size_t &i1, const size_t &i2) {
       return f(points[i2].point) > f(points[i1].point);
     };
@@ -35,17 +35,17 @@ private:
 
 public:
 
-  SortedPoints(const vector<PointWithData<T>> &points) : xSortedIndexes(points.size()),
+  SortedPoints(const vector<PointWithData<T, C>> &points) : xSortedIndexes(points.size()),
                                                          ySortedIndexes(points.size()),
                                                          points(points) {
     iota(xSortedIndexes.begin(), xSortedIndexes.end(), 0);
     iota(ySortedIndexes.begin(), ySortedIndexes.end(), 0);
 
     std::sort(xSortedIndexes.begin(), xSortedIndexes.end(),
-              pointComparator([](const Point &p) { return p.x; }));
+              pointComparator([](const Point<C> &p) { return p.x; }));
 
     std::sort(ySortedIndexes.begin(), ySortedIndexes.end(),
-              pointComparator([](const Point &p) { return p.y; }));
+              pointComparator([](const Point<C> &p) { return p.y; }));
 
 
     reverseYIndex = transposeVector(ySortedIndexes);
@@ -57,11 +57,11 @@ public:
     return points.size();
   }
 
-  const PointWithData<T> &getX(size_t i) const {
+  const PointWithData<T, C> &getX(size_t i) const {
     return points[xSortedIndexes[i]];
   }
 
-  vector<PointWithData<T>> getAllY(size_t fromX, size_t toX) const {
+  vector<PointWithData<T, C>> getAllY(size_t fromX, size_t toX) const {
 
     vector<size_t> subIndexes(xSortedIndexes.begin() + fromX, xSortedIndexes.begin() + toX + 1);
 
@@ -71,7 +71,7 @@ public:
       mappedToYIndexes.insert(ySortedIndexes[reverseYIndex[index]]);
     }
 
-    vector<PointWithData<T>> out;
+    vector<PointWithData<T, C>> out;
 
     for (auto yIndex : ySortedIndexes) {
       if(mappedToYIndexes.find(yIndex) != mappedToYIndexes.end()) {
@@ -86,9 +86,9 @@ public:
 };
 
 
-template<typename T>
-SortedPoints<T> make_sorted_points(const vector<PointWithData<T>> &points) {
-  return SortedPoints<T>(points);
+template<typename T, typename C>
+SortedPoints<T, C> make_sorted_points(const vector<PointWithData<T, C>> &points) {
+  return SortedPoints<T, C>(points);
 }
 
 #endif //GEO_PROJ_SORTEDPOINTS_H

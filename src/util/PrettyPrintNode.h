@@ -6,8 +6,8 @@
 #include "../Node.h"
 using namespace std;
 
-template<typename T>
-int _print_t(Node<T> *tree, int is_left, int offset, int depth, char s[20][255])
+template<typename T, typename C>
+int _print_t(Node<T, C> *tree, int is_left, int offset, int depth, char s[20][255])
 {
   char b[20];
   int width = 5;
@@ -62,8 +62,8 @@ int _print_t(Node<T> *tree, int is_left, int offset, int depth, char s[20][255])
   return left + width + right;
 }
 
-template <typename T>
-void prettyPrint(std::ostream &os, Node<T> *tree)
+template <typename T, typename C>
+void prettyPrint(std::ostream &os, Node<T, C> *tree)
 {
   if(tree == nullptr) {
     os << "Tree-is-nullptr" << endl;
@@ -79,8 +79,8 @@ void prettyPrint(std::ostream &os, Node<T> *tree)
     os << string(s[i]) << endl;
 }
 
-template <typename T>
-void prettyPrint(Node<T> *tree)
+template <typename T, typename C>
+void prettyPrint(Node<T, C> *tree)
 {
   prettyPrint(cout, tree);
 }

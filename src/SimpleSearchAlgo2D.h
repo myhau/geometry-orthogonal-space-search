@@ -13,16 +13,20 @@ using namespace std;
  *
  * use it to compare times of algorithms
  */
+template <typename C = double>
 class SimpleSearchAlgo2D {
+private:
+
 public:
 
-  vector<Point> points;
 
-  SimpleSearchAlgo2D(const vector<Point> & points): points(points) {}
+  vector<Point<C>> points;
 
-  set<Point> search(double fromX, double toX, double fromY, double toY) {
+  SimpleSearchAlgo2D(const vector<Point<C>> & points): points(points) {}
 
-    set<Point> out;
+  auto search(double fromX, double toX, double fromY, double toY) {
+
+    set<Point<C>> out;
 
     for (auto &&item : points) {
       if(fromX <= item.x && item.x <= toX && fromY <= item.y && item.y <= toY) {
@@ -33,7 +37,7 @@ public:
     return out;
   }
 
-  set<Point> search(const Rect& rect) {
+  auto search(const Rect<C>& rect) {
     return search(rect.xFrom, rect.xTo, rect.yFrom, rect.yTo);
   }
 };

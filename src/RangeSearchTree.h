@@ -20,19 +20,19 @@ using std::endl;
 using std::shared_ptr;
 using std::make_shared;
 
-template<typename T>
-using KeyFunction = function<double(T)>;
+template<typename T, typename C = double>
+using KeyFunction = function<C(T)>;
 
 
-template<typename T>
+template<typename T, typename C = double>
 class RangeSearchTree {
 private:
 
-  using TreeKeyFunction = KeyFunction<T>;
-  using NodePtr = Node<T> *;
+  using TreeKeyFunction = KeyFunction<T, C>;
+  using NodePtr = Node<T, C> *;
   using Vec = vector<T>;
   using Set = set<T>;
-  
+
   bool elementsAreSorted;
 
   TreeKeyFunction keyF;
@@ -53,7 +53,7 @@ private:
     // TODO: probably we can simplify this code here
     auto medPos = beg + end;
     auto medianPosition = medPos / 2;
-    double median;
+    C median;
 
     auto keyMedian1 = keyF(els[medianPosition]);
     auto keyMedian2 = keyF(els[medianPosition + 1]);
@@ -75,8 +75,7 @@ private:
     auto medianNode = make_node_ptr<T>(median);
 
     if (firstEndI >= beg) {
-      // FIXME: probably is not needed if point coordinate comparator is different
-      if(firstEndI == end || firstEndI + 1 == beg) {
+      if (firstEndI == end || firstEndI + 1 == beg) {
         throw logic_error("Should not happend, will be solved");
       }
       medianNode->left = buildSubTree(els, beg, firstEndI);
@@ -87,9 +86,9 @@ private:
   }
 
   NodePtr buildTree(const Vec &elements) {
-    if(elements.empty()) return nullptr;
-    
-    if(!elementsAreSorted) {
+    if (elements.empty()) return nullptr;
+
+    if (!elementsAreSorted) {
       Vec sortedVec(elements);
       std::sort(sortedVec.begin(), sortedVec.end(),
                 [this](const T &p1, const T &p2) { return keyF(p2) > keyF(p1); });
@@ -120,7 +119,8 @@ private:
     LEFT, RIGHT
   };
 
-  void collectAll(NodePtr root, double from, double to, VSplitSubtree subtreeType, Set &collector) const {
+  void
+  collectAll(NodePtr root, C from, C to, VSplitSubtree subtreeType, Set &collector) const {
     if (root == nullptr) return;
 
     NodePtr iterNode;
@@ -155,7 +155,7 @@ private:
     if (from <= iterNode->key && iterNode->key <= to) collectWholeSubTree(iterNode, collector);
   }
 
-  NodePtr findVSplit(NodePtr tree, double from, double to) const {
+  NodePtr findVSplit(NodePtr tree, C from, C to) const {
     NodePtr subTree = tree;
     while (subTree != nullptr && !subTree->isLeaf && (subTree->key >= to || subTree->key < from)) {
       if (subTree->key >= to) {
@@ -170,35 +170,26 @@ private:
 
 public:
 
-  RangeSearchTree(const vector<T> &els, TreeKeyFunction keyF, bool elementsAreSorted = false) :
-          keyF(keyF),
-          elementsAreSorted(elementsAreSorted),
-          tree(buildTree(els)) {
-  }
-
-  RangeSearchTree() : keyF([](T a) { return 0.0; }), tree(nullptr) {}
-
-
-  Set search(double keyFrom, double keyTo) const {
+  Set search(C keyFrom, C keyTo) const {
     Set collector;
     search(keyFrom, keyTo, collector);
     return collector;
   }
 
-  void search(double keyFrom, double keyTo, set<T>& collector) const {
+  void search(C keyFrom, C keyTo, set<T> &collector) const {
     if (keyFrom > keyTo) {
       auto err = (boost::format("Invalid arguments from %s to %s") % keyFrom % keyTo).str();
       throw std::invalid_argument(err);
     }
 
-    if(tree == nullptr) return;
+    if (tree == nullptr) return;
 
     NodePtr vSplitTree = findVSplit(tree, keyFrom, keyTo);
 
     if (vSplitTree == nullptr) return;
 
     if (vSplitTree->isLeaf) {
-      if(keyFrom <= vSplitTree->key && vSplitTree->key <= keyTo) {
+      if (keyFrom <= vSplitTree->key && vSplitTree->key <= keyTo) {
         collector.insert(vSplitTree->value);
       }
     } else {
@@ -206,6 +197,15 @@ public:
       collectAll(vSplitTree, keyFrom, keyTo, RIGHT, collector);
     }
   }
+
+  RangeSearchTree(const vector<T> &els, TreeKeyFunction keyF, bool elementsAreSorted = false) :
+          keyF(keyF),
+          elementsAreSorted(elementsAreSorted),
+          tree(buildTree(els)) {
+  }
+
+
+  RangeSearchTree() : keyF([](T a) { return 0.0; }), tree(nullptr) {}
 
 
   friend std::ostream &operator<<(std::ostream &os, const RangeSearchTree &tree) {
@@ -219,16 +219,16 @@ public:
 };
 
 
-template<typename T>
-RangeSearchTree<T> make_range_search_tree(const vector<T> &els, KeyFunction<T> keyF) {
-  return RangeSearchTree<T>(els, keyF);
+template<typename T, typename C = double>
+RangeSearchTree<T, C> make_range_search_tree(const vector<T> &els, KeyFunction<T, C> keyF) {
+  return RangeSearchTree<T, C>(els, keyF);
 }
 
-template<typename T>
-shared_ptr<RangeSearchTree<T>> make_range_search_tree_shared_ptr(const vector<T> &els, KeyFunction<T> keyF, bool sorted = false) {
-  return shared_ptr<RangeSearchTree<T>>(new RangeSearchTree<T>(els, keyF));
+template<typename T, typename C = double>
+shared_ptr<RangeSearchTree<T, C>>
+make_range_search_tree_shared_ptr(const vector<T> &els, KeyFunction<T, C> keyF, bool sorted = false) {
+  return shared_ptr<RangeSearchTree<T, C>>(new RangeSearchTree<T, C>(els, keyF));
 }
-
 
 
 #endif //GEO_PROJ_RANGESEARCHTREE_H

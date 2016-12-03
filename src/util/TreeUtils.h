@@ -3,7 +3,7 @@
 
 #include "../Node.h"
 #include <utility>
-#include <climits>
+#include <limits>
 #include <algorithm>
 
 using namespace std;
@@ -11,14 +11,14 @@ using namespace std;
 class TreeUtils {
 public:
 
-  template<typename T>
-  static bool isWellBalanced(Node<T>* tree) {
-    auto res = minMaxLeafLevel(tree, 0, INT_MAX, INT_MIN);
-    return res.second - res.first < 2; // todo: check it
+  template<typename T, typename C>
+  static bool isWellBalanced(Node<T, C>* tree) {
+    auto res = minMaxLeafLevel(tree, 0, numeric_limits<int>::max(), numeric_limits<int>::min());
+    return res.second - res.first < 2;
   }
 
-  template<typename T>
-  static pair<int, int> minMaxLeafLevel(Node<T>* n, int level, int minLevel, int maxLevel) {
+  template<typename T, typename C>
+  static pair<int, int> minMaxLeafLevel(Node<T, C>* n, int level, int minLevel, int maxLevel) {
     if(n == nullptr) {
       return make_pair(min(level, minLevel), max(level, maxLevel));
     }

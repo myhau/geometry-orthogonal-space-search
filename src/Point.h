@@ -3,11 +3,12 @@
 
 
 #include <ostream>
+#include "ComparableTuple.h"
 
-
+template<typename C = double>
 struct Point {
-  double x;
-  double y;
+  C x;
+  C y;
 
   bool operator==(const Point &rhs) const {
     return x == rhs.x &&
@@ -54,9 +55,9 @@ struct Point {
     return Point(x * r, y * r);
   }
 
-  Point(double x, double y) : x(x), y(y) {}
+  Point(C x, C y) : x(x), y(y) {}
 
-  Point(double xy[2]) : x(xy[0]), y(xy[1]) {}
+  Point(C xy[2]) : x(xy[0]), y(xy[1]) {}
 
   Point() {}
 
@@ -65,26 +66,32 @@ struct Point {
     return os;
   }
 
-  static double getX(const Point &p) {
+  static C getX(const Point &p) {
     return p.x;
   }
 
-  static double getY(const Point &p) {
+  static C getY(const Point &p) {
     return p.y;
   }
 };
 
-inline Point make_simple_point(double x, double y) {
-  return Point(x, y);
+template <typename C = double>
+inline Point<C> point(C x, C y) {
+  return Point<C>(x, y);
 }
 
 
-template<typename T>
+
+inline static Point<ComparableTuple> toUniquePoint(Point<double> p) {
+  return point(ComparableTuple(p.x, p.y), ComparableTuple(p.y, p.x));
+}
+
+template<typename T, typename C = double>
 struct PointWithData {
-  Point point;
+  Point<C> point;
   T data;
 
-  PointWithData(const Point &point, T data) : point(point), data(data) {}
+  PointWithData(const Point<C> &point, T data) : point(point), data(data) {}
 
   PointWithData() {}
 
@@ -125,18 +132,18 @@ struct PointWithData {
 };
 
 
-template<typename T>
-inline PointWithData<T> make_point_with_data(const Point &point, T data) {
-  return PointWithData<T>(point, data);
+template<typename T, typename C = double>
+inline PointWithData<T, C> make_point_with_data(const Point<C> &point, T data) {
+  return PointWithData<T, C>(point, data);
 }
 
-template<typename T>
-double getX(const PointWithData<T> &p) {
+template<typename T, typename C = double>
+C getX(const PointWithData<T, C> &p) {
   return p.point.x;
 }
 
-template<typename T>
-double getY(const PointWithData<T> &p) {
+template<typename T, typename C = double>
+C getY(const PointWithData<T, C> &p) {
   return p.point.y;
 }
 

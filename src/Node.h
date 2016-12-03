@@ -1,42 +1,42 @@
 #ifndef GEO_PROJ_NODE_H
 #define GEO_PROJ_NODE_H
 
-template<typename T>
+template<typename T, typename C>
 struct Node {
   Node *left;
   Node *right;
-  double key;
+  C key;
   bool isLeaf;
   T value;
 
-  Node(double key, T value) : key(key), value(value), isLeaf(true), left(nullptr), right(nullptr) {}
+  Node(C key, T value) : key(key), value(value), isLeaf(true), left(nullptr), right(nullptr) {}
 
-  Node(double key, T value, bool leaf) : key(key), value(value), isLeaf(leaf), left(nullptr),
+  Node(C key, T value, bool leaf) : key(key), value(value), isLeaf(leaf), left(nullptr),
                                          right(nullptr) {}
 
-  Node(double key) : key(key), isLeaf(false), left(nullptr), right(nullptr) {}
+  Node(C key) : key(key), isLeaf(false), left(nullptr), right(nullptr) {}
 
 };
 
-template<typename T>
-Node<T> make_node(double key, T value, bool leaf = true) {
-  return Node<T>(key, value, leaf);
+template<typename T, typename Comparable>
+Node<T, Comparable> make_node(Comparable key, T value, bool leaf = true) {
+  return Node<T, Comparable>(key, value, leaf);
 }
 
-template<typename T>
-Node<T> make_node(double key) {
-  return Node<T>(key);
+template<typename T, typename Comparable>
+Node<T, Comparable> make_node(Comparable key) {
+  return Node<T, Comparable>(key);
 }
 
 
-template<typename T>
-Node<T> *make_node_ptr(double key, T value, bool leaf = true) {
-  return new Node<T>(key, value, leaf);
+template<typename T, typename C>
+Node<T, C> *make_node_ptr(C key, T value, bool leaf = true) {
+  return new Node<T, C>(key, value, leaf);
 }
 
-template<typename T>
-Node<T> *make_node_ptr(double key) {
-  return new Node<T>(key);
+template<typename T, typename C>
+Node<T, C> *make_node_ptr(C key) {
+  return new Node<T, C>(key);
 }
 
 //template<typename T>
@@ -44,8 +44,8 @@ Node<T> *make_node_ptr(double key) {
 //
 //};
 
-template<typename T>
-void destruct(Node<T> *n) {
+template<typename T, typename C>
+void destruct(Node<T, C> *n) {
   if (n == nullptr) {
     return;
   }

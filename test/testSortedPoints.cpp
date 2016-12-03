@@ -11,10 +11,10 @@ using namespace std;
 TEST_CASE("sorted points should work") {
 
   vector<PointWithData<int>> points = {
-          PointWithData<int>(Point(1, 2), 1),
-          PointWithData<int>(Point(2, 1), 2),
-          PointWithData<int>(Point(4, 4), 3),
-          PointWithData<int>(Point(0, 0), 4)
+          PointWithData<int>(Point<>(1, 2), 1),
+          PointWithData<int>(Point<>(2, 1), 2),
+          PointWithData<int>(Point<>(4, 4), 3),
+          PointWithData<int>(Point<>(0, 0), 4)
   };
 
   SortedPoints<int> sortedPoints(points);
@@ -40,11 +40,11 @@ TEST_CASE("sorted points should work") {
   }
 
   SECTION("test ") {
-    vector<Point> points = {Point(11, 2), Point(12, 3), Point(4, 123), Point(13, 0), Point(10, 10), Point(5, 5)};
+    vector<Point<double>> points2 = {point(11.0, 2.0), point(12.0, 3.0), point(4.0, 123.0), point(13.0, 0.0), point(10.0, 10.0), point(5.0, 5.0)};
 
     vector<PointWithData<double>> pointsWithWhateverData;
 
-    for (auto &&item : points) {
+    for (auto &&item : points2) {
       pointsWithWhateverData.push_back(make_point_with_data(item, item.x));
     }
 
