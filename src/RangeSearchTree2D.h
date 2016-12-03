@@ -102,9 +102,6 @@ private:
     NodePtr medianNode = make_node_ptr(median, associatedStructure, false);
 
     if (nextIterationMiddleCandidate >= xBeg) {
-      if (nextIterationMiddleCandidate == xEnd || nextIterationMiddleCandidate + 1 == xBeg) {
-        throw logic_error("Should not happend, will be solved");
-      }
       medianNode->left = buildSubTree(preSorted, xBeg, nextIterationMiddleCandidate);
       medianNode->right = buildSubTree(preSorted, nextIterationMiddleCandidate + 1, xEnd);
     }

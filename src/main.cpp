@@ -8,7 +8,5 @@ int main() {
 
   auto searchTree = RangeSearchTree2D(points, identity());
 
-
-
   return 0;
 }

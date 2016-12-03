@@ -75,9 +75,6 @@ private:
     auto medianNode = make_node_ptr<T>(median);
 
     if (firstEndI >= beg) {
-      if (firstEndI == end || firstEndI + 1 == beg) {
-        throw logic_error("Should not happend, will be solved");
-      }
       medianNode->left = buildSubTree(els, beg, firstEndI);
       medianNode->right = buildSubTree(els, firstEndI + 1, end);
     }
