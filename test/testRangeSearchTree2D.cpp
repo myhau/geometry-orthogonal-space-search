@@ -72,7 +72,7 @@ TEST_CASE("range search 2D tree simple cases") {
 
   SECTION("regression, works some points") {
     vector<Point> inputVecWithNoXYdup = {
-            Point(12, 2), Point(11, 3), Point(13, 4), Point(5, 70), Point(5, 100), Point(3, 101), Point(1, 70)
+            Point(12, 2), Point(11, 3), Point(13, 4), Point(5, 70), Point(6, 100), Point(3, 101), Point(1, 75)
     };
 
     set<Point> expected = set<Point>();
@@ -110,7 +110,7 @@ TEST_CASE("range search 2D tree simple cases") {
 
   SECTION("works for multiple circles with multiple densities, captures only whole two of em") {
 
-    auto onCircle1Center = Point(-10, 10);
+    auto onCircle1Center = Point(-1000, 10);
     vector<Point> onCircle1 = Random::randomPointsOnCircle(onCircle1Center, 3, 100);
 
     auto circle2Center = Point(-90, 90);
@@ -140,8 +140,8 @@ TEST_CASE("range search 2D tree simple cases") {
     }
 
     SECTION("should find only two circle chunks") {
-      auto beforeAllCircle2Points = circle2Center - Point(circle2R + 0.01, circle2R - 0.01);
-      auto afterAllCircle4Points = circle4Center + Point(circle4R + 0.01, circle4R + 0.01);
+      auto beforeAllCircle2Points = circle2Center - Point(circle2R + 0.01, -(circle2R + 0.01));
+      auto afterAllCircle4Points = circle4Center + Point(circle4R + 0.01, -(circle4R + 0.01));
 
       auto expectedVector = Vectors::concat({insideCircle2, insideCircle4});
       auto expected = set<Point>(expectedVector.begin(), expectedVector.end());
@@ -171,12 +171,22 @@ TEST_CASE("range search 2D tree simple cases") {
   }
 
   SECTION("works for some hand defined cases") {
+
     auto problemAndPoints = BitmapToProblem::bitmapToProblemInputs(
             {
-                    {'x', 'x', 'x'},
-                    {'-', '-', '-'},
-                    {'|', 'x', '|'},
-                    {'_', '_', '_'}
+                    "x..",
+                    "___",
+                    "|x|",
+                    "___"
+            }
+    );
+
+    auto expectedPoints = BitmapToProblem::bitmapToPoints(
+            {
+                    "...",
+                    "...",
+                    ".x.",
+                    "..."
             }
     );
 
@@ -185,8 +195,7 @@ TEST_CASE("range search 2D tree simple cases") {
 
     auto searchTree1 = searchTreeOfPoints(points);
 
-    set<Point> expected;
-    expected.insert(Point(1, -2));
+    set<Point> expected(expectedPoints.begin(), expectedPoints.end());
 
     REQUIRE(
             searchTree1.search(inputRect)
@@ -234,7 +243,7 @@ TEST_CASE("range search 2D tree simple cases") {
   }
 
 
-  SECTION("there should be no difference if searched area is big or small, if it captures all points, it should return all points, no more, no less") {
+  SECTION("duplicates, there should be no difference if searched area is big or small, if it captures all points, it should return all points, no more, no less") {
     vector<Point> points = Random::randomPointsOnRect(10.0, 20.0, 10.0, 50.0, 1000);
 
     set<Point> expected = set<Point>(points.begin(), points.end());
@@ -247,10 +256,31 @@ TEST_CASE("range search 2D tree simple cases") {
 
 }
 
+TEST_CASE("regression of bug from random cases") {
+  auto xFrom = -80.6745;
+  auto xTo = -32.4586;
+  auto yFrom = -86.7603;
+  auto yTo = 20.6691;
+
+  vector<Point> inputPoints = {
+          Point(-63.3324, 64.593),
+          Point(54.527, 66.7813), Point(-92.5699, -66.5828), Point(-34.4144, -26.0688),
+          Point(50.4202, -0.227207), Point(-81.2191, -29.9168), Point(-11.1975, -84.5985),
+          Point(-43.7512, 48.5778)
+  };
+
+  set<Point> expected;
+  expected.insert(Point(-34.4144, -26.0688));
+
+  auto treeUnderTest = searchTreeOfPoints(inputPoints);
+
+  REQUIRE(treeUnderTest.search(xFrom, xTo, yFrom, yTo) == expected);
+}
+
 
 TEST_CASE("test a lot of random cases by comparing results with simple algorithm that 100% works") {
 
-  auto N = 10000;
+  auto N = 100000;
   auto EACH_COUNT_MULT = 1;
 
   for (int i = 0; N > i; i++) {
@@ -278,3 +308,5 @@ TEST_CASE("test a lot of random cases by comparing results with simple algorithm
   }
 
 }
+
+

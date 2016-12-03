@@ -25,7 +25,7 @@ public:
     set<Point> out;
 
     for (auto &&item : points) {
-      if(item.x >= fromX && item.x <= toX && item.y >= fromY && item.y <= toX) {
+      if(fromX <= item.x && item.x <= toX && fromY <= item.y && item.y <= toY) {
         out.insert(item);
       }
     }

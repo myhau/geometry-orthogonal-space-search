@@ -6,6 +6,7 @@
 #include "../Rect.h"
 #include <vector>
 #include <algorithm>
+#include <limits>
 
 using namespace std;
 
@@ -19,28 +20,45 @@ public:
    *
    * it does not check if input is valid
    */
+
+  static vector<Point> bitmapToPoints(vector<string> bitmap, double multiplier = 1.0) {
+    return bitmapToProblemInputs(bitmap, multiplier).second;
+  }
+
+  static pair<Rect, vector<Point>> bitmapToProblemInputs(vector<string> bitmap, double multiplier = 1.0) {
+    vector<vector<char>> out(bitmap.size());
+    transform(bitmap.begin(), bitmap.end(), out.begin(), [](const string& line){return vector<char>(line.begin(), line.end());});
+    return bitmapToProblemInputs(out, multiplier);
+  }
+private:
+  static vector<Point> bitmapToPoints(vector<vector<char>> bitmap, double multiplier = 1.0) {
+    return bitmapToProblemInputs(bitmap, multiplier).second;
+  }
   static pair<Rect, vector<Point>> bitmapToProblemInputs(vector<vector<char>> bitmap, double multiplier = 1.0) {
-    double minX = 0, maxX = 0, minY = 0, maxY = 0;
+    double inf = numeric_limits<double>::infinity();
+    double minX = inf, maxX = -inf, minY = inf, maxY = -inf;
 
     vector<Point> out;
     for (int i = 0; i < bitmap.size(); ++i) {
       for (int j = 0; j < bitmap[i].size(); ++j) {
-        double dI = (double) i;
+        double dy = -i;
+        double dx = j;
         switch (bitmap[i][j]) {
           case 'x':
-            out.push_back(Point(i, -j));
+            out.push_back(Point(dx, dy));
             break;
           case '*':
-            out.push_back(Point(i, -j));
+            out.push_back(Point(dx, dy));
           case '-':
           case '_':
           case '|':
-            minX = min(minX, dI);
-            maxX = max(maxX, dI);
-            minY = min(minY, dI);
-            maxY = max(maxY, dI);
+            minX = min(minX, dx);
+            maxX = max(maxX, dx);
+            minY = min(minY, dy);
+            maxY = max(maxY, dy);
             break;
-
+          case ' ':
+          case '.':
           default:
             break;
         }

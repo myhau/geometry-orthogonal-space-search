@@ -4,6 +4,7 @@
 
 #include <ostream>
 
+
 struct Point {
   double x;
   double y;
@@ -45,7 +46,7 @@ struct Point {
     return Point(-x, -y);
   }
 
-  Point operator-(const Point& rhs) const {
+  Point operator-(const Point &rhs) const {
     return Point(x - rhs.x, y - rhs.y);
   }
 
@@ -62,6 +63,14 @@ struct Point {
   friend std::ostream &operator<<(std::ostream &os, const Point &point) {
     os << "(" << point.x << ", " << point.y << ")";
     return os;
+  }
+
+  static double getX(const Point &p) {
+    return p.x;
+  }
+
+  static double getY(const Point &p) {
+    return p.y;
   }
 };
 
@@ -119,6 +128,16 @@ struct PointWithData {
 template<typename T>
 inline PointWithData<T> make_point_with_data(const Point &point, T data) {
   return PointWithData<T>(point, data);
+}
+
+template<typename T>
+double getX(const PointWithData<T> &p) {
+  return p.point.x;
+}
+
+template<typename T>
+double getY(const PointWithData<T> &p) {
+  return p.point.y;
 }
 
 

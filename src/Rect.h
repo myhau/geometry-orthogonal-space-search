@@ -23,6 +23,10 @@ struct Rect {
     os << " xFrom: " << rect.xFrom << " xTo: " << rect.xTo << "yFrom: " << rect.yFrom << " yTo: " << rect.yTo;
     return os;
   }
+
+  bool contains(const Point& p) {
+    return xFrom >= p.x && xTo <= p.x && yFrom >= p.y && yTo <= p.y;
+  }
 };
 
 

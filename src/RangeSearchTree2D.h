@@ -38,7 +38,8 @@ public:
 private:
 
   NodePtr buildTree(const vector<T> &elements) {
-    if(elements.empty()) return nullptr;
+    if (elements.empty()) return nullptr;
+
     vector<PointWithData<T>> pointsWithData(elements.size());
     auto f = [this](const T &data) { return make_point_with_data(keyF(data), data); };
     transform(elements.begin(), elements.end(), pointsWithData.begin(), f);
@@ -50,28 +51,30 @@ private:
 
   NodePtr buildSubTree(const SortedPoints<T> &preSorted, size_t xBeg, size_t xEnd) {
 
-
     if (xBeg > xEnd) {
       return nullptr;
     }
 
-    // TODO: probably can be moved somewhere else
-    auto toYCoordMapper = [](const PointWithData<T> &pointAndData) { return pointAndData.point.y; };
-    auto toXCoordMapper = [](const PointWithData<T> &pointAndData) { return pointAndData.point.x; };
-
     if (xBeg == xEnd) {
       auto value = preSorted.getX(xBeg);
       vector<PointWithData<T>> values = {value};
-      NodePtr node = make_node_ptr(toXCoordMapper(value),
-                                   make_range_search_tree_shared_ptr<PointWithData<T>>(values,
-                                                                                       toYCoordMapper), true);
+      NodePtr node =
+              make_node_ptr(
+                      getX(value),
+                      make_range_search_tree_shared_ptr<PointWithData<T>>(values, getY<T>, true),
+                      true
+              );
+
       return node;
     }
 
     auto associatedStructureData = preSorted.getAllY(xBeg, xEnd);
-
-    auto associatedStructure = make_range_search_tree_shared_ptr<PointWithData<T>>(associatedStructureData,
-                                                                                   toYCoordMapper);
+    auto associatedStructure =
+            make_range_search_tree_shared_ptr<PointWithData<T>>(
+                    associatedStructureData,
+                    getY<T>,
+                    true
+            );
 
     // TODO: probably we can simplify this code here
     auto almostMedianPosition = xBeg + xEnd;
@@ -80,11 +83,11 @@ private:
     auto nextIterationMiddleCandidate = medianPosition - 1;
     double median;
     if (almostMedianPosition % 2 == 0) {
-      median = toXCoordMapper(preSorted.getX(medianPosition));
+      median = getX(preSorted.getX(medianPosition));
       nextIterationMiddleCandidate = medianPosition;
     } else {
-      auto medVal1 = toXCoordMapper(preSorted.getX(medianPosition));
-      auto medVal2 = toXCoordMapper(preSorted.getX(medianPosition + 1));
+      auto medVal1 = getX(preSorted.getX(medianPosition));
+      auto medVal2 = getX(preSorted.getX(medianPosition + 1));
       median = (medVal1 + medVal2) / 2;
       if (medVal1 <= median) {
         nextIterationMiddleCandidate = medianPosition;
@@ -97,14 +100,11 @@ private:
     NodePtr medianNode = make_node_ptr(median, associatedStructure, false);
 
     if (nextIterationMiddleCandidate >= xBeg) {
-      // prevent infinite recursion
-      if (nextIterationMiddleCandidate != xEnd) {
-        medianNode->left = buildSubTree(preSorted, xBeg, nextIterationMiddleCandidate);
+      if (nextIterationMiddleCandidate == xEnd || nextIterationMiddleCandidate + 1 == xBeg) {
+        throw logic_error("Should not happend, will be solved");
       }
-      // probably also prevents infinite recursion
-      if (nextIterationMiddleCandidate + 1 != xBeg) {
-        medianNode->right = buildSubTree(preSorted, nextIterationMiddleCandidate + 1, xEnd);
-      }
+      medianNode->left = buildSubTree(preSorted, xBeg, nextIterationMiddleCandidate);
+      medianNode->right = buildSubTree(preSorted, nextIterationMiddleCandidate + 1, xEnd);
     }
 
     return medianNode;
@@ -129,10 +129,6 @@ private:
   void collectAll(NodePtr tree, const Rect &area, VSplitSubtree subtreeType,
                   set<PointWithData<T>> &collector) const {
 
-    if (tree == nullptr) return;
-
-    collectFromAssociatedStructure(tree, area, collector);
-
     NodePtr iterNode;
 
     if (subtreeType == LEFT) {
@@ -141,16 +137,12 @@ private:
       iterNode = tree->right;
     }
 
-    if (iterNode == nullptr) return;
+    while (!iterNode->isLeaf) {
 
-    // FIXME: should we do something with leaf ?
-
-    while (iterNode != nullptr) {
       if (subtreeType == LEFT) {
 
         if (iterNode->key >= area.xFrom) {
-          // FIXME: should we collecto from iterNode->right or iterNode ?
-          collectFromAssociatedStructure(iterNode, area, collector);
+          collectFromAssociatedStructure(iterNode->right, area, collector);
           iterNode = iterNode->left;
         } else {
           iterNode = iterNode->right;
@@ -159,7 +151,7 @@ private:
       } else {
 
         if (iterNode->key <= area.xTo) {
-          collectFromAssociatedStructure(iterNode, area, collector);
+          collectFromAssociatedStructure(iterNode->left, area, collector);
           iterNode = iterNode->right;
         } else {
           iterNode = iterNode->left;
@@ -167,16 +159,19 @@ private:
 
       }
     }
+    if (area.xFrom <= iterNode->key && iterNode->key <= area.xTo) {
+      collectFromAssociatedStructure(iterNode, area, collector);
+    }
   }
 
   void
   collectFromAssociatedStructure(NodePtr tree, const Rect &area, set<PointWithData<T>> &collector) const {
+    if (tree == nullptr) return;
     auto yDimensionSearchTree = tree->value.get();
     yDimensionSearchTree->search(area.yFrom, area.yTo, collector);
   }
 
 public:
-
 
 
   RangeSearchTree2D(const vector<T> &els, KeyFunction keyF) :
@@ -207,8 +202,14 @@ public:
 
     set<PointWithData<T>> collector;
 
-    collectAll(vSplitTree, area, LEFT, collector);
-    collectAll(vSplitTree, area, RIGHT, collector);
+    if (vSplitTree->isLeaf) {
+      if(area.xFrom <= vSplitTree->key && vSplitTree->key <= area.xTo) {
+        collectFromAssociatedStructure(vSplitTree, area, collector);
+      }
+    } else {
+      collectAll(vSplitTree, area, LEFT, collector);
+      collectAll(vSplitTree, area, RIGHT, collector);
+    }
 
     for (auto &&item : collector) {
       out.insert(item.data);
@@ -221,6 +222,7 @@ public:
   virtual ~RangeSearchTree2D() {
     destruct(tree);
   }
+
 };
 
 static RangeSearchTree2D<Point> searchTreeOfPoints(const vector<Point> &els) {

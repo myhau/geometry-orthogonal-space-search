@@ -32,6 +32,8 @@ private:
   using NodePtr = Node<T> *;
   using Vec = vector<T>;
   using Set = set<T>;
+  
+  bool elementsAreSorted;
 
   TreeKeyFunction keyF;
 
@@ -73,12 +75,12 @@ private:
     auto medianNode = make_node_ptr<T>(median);
 
     if (firstEndI >= beg) {
-      if(firstEndI != end) {
-        medianNode->left = buildSubTree(els, beg, firstEndI);
+      // FIXME: probably is not needed if point coordinate comparator is different
+      if(firstEndI == end || firstEndI + 1 == beg) {
+        throw logic_error("Should not happend, will be solved");
       }
-      if(firstEndI + 1 != beg) {
-        medianNode->right = buildSubTree(els, firstEndI + 1, end);
-      }
+      medianNode->left = buildSubTree(els, beg, firstEndI);
+      medianNode->right = buildSubTree(els, firstEndI + 1, end);
     }
 
     return medianNode;
@@ -86,10 +88,15 @@ private:
 
   NodePtr buildTree(const Vec &elements) {
     if(elements.empty()) return nullptr;
-    Vec sortedVec(elements);
-    std::sort(sortedVec.begin(), sortedVec.end(), [this](const T &p1, const T &p2) {return keyF(p2) > keyF(p1);});
-
-    return buildSubTree(sortedVec, 0, sortedVec.size() - 1);
+    
+    if(!elementsAreSorted) {
+      Vec sortedVec(elements);
+      std::sort(sortedVec.begin(), sortedVec.end(),
+                [this](const T &p1, const T &p2) { return keyF(p2) > keyF(p1); });
+      return buildSubTree(elements, 0, elements.size() - 1);
+    } else {
+      return buildSubTree(elements, 0, elements.size() - 1);
+    }
   }
 
   void collectWholeSubTree(NodePtr root, Set &collectTo) const {
@@ -124,12 +131,7 @@ private:
       iterNode = root->right;
     }
 
-    if (iterNode == nullptr) return;
-    if (iterNode->isLeaf) {
-      if (iterNode->key >= from && iterNode->key <= to) collectWholeSubTree(iterNode, collector);
-    }
-
-    while (iterNode != nullptr) {
+    while (!iterNode->isLeaf) {
       if (subtreeType == LEFT) {
 
         if (iterNode->key >= from) {
@@ -150,7 +152,7 @@ private:
 
       }
     }
-
+    if (from <= iterNode->key && iterNode->key <= to) collectWholeSubTree(iterNode, collector);
   }
 
   NodePtr findVSplit(NodePtr tree, double from, double to) const {
@@ -168,8 +170,9 @@ private:
 
 public:
 
-  RangeSearchTree(const vector<T> &els, TreeKeyFunction keyF) :
+  RangeSearchTree(const vector<T> &els, TreeKeyFunction keyF, bool elementsAreSorted = false) :
           keyF(keyF),
+          elementsAreSorted(elementsAreSorted),
           tree(buildTree(els)) {
   }
 
@@ -194,8 +197,10 @@ public:
 
     if (vSplitTree == nullptr) return;
 
-    if (vSplitTree->isLeaf && (vSplitTree->key >= keyFrom && vSplitTree->key <= keyTo)) {
-      collector.insert(vSplitTree->value);
+    if (vSplitTree->isLeaf) {
+      if(keyFrom <= vSplitTree->key && vSplitTree->key <= keyTo) {
+        collector.insert(vSplitTree->value);
+      }
     } else {
       collectAll(vSplitTree, keyFrom, keyTo, LEFT, collector);
       collectAll(vSplitTree, keyFrom, keyTo, RIGHT, collector);
@@ -220,7 +225,7 @@ RangeSearchTree<T> make_range_search_tree(const vector<T> &els, KeyFunction<T> k
 }
 
 template<typename T>
-shared_ptr<RangeSearchTree<T>> make_range_search_tree_shared_ptr(const vector<T> &els, KeyFunction<T> keyF) {
+shared_ptr<RangeSearchTree<T>> make_range_search_tree_shared_ptr(const vector<T> &els, KeyFunction<T> keyF, bool sorted = false) {
   return shared_ptr<RangeSearchTree<T>>(new RangeSearchTree<T>(els, keyF));
 }
 
