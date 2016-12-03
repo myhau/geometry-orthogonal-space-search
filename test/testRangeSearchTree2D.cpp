@@ -280,7 +280,7 @@ TEST_CASE("regression of bug from random cases") {
 
 TEST_CASE("test a lot of random cases by comparing results with simple algorithm that 100% works") {
 
-  auto N = 100000;
+  auto N = 500;
   auto EACH_COUNT_MULT = 1;
 
   for (int i = 0; N > i; i++) {
