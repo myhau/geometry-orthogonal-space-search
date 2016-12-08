@@ -1,0 +1,102 @@
+{
+	
+	"points": [
+		{ "x": 0.1, "y": 1.3 },
+		{ "x": 0.76, "y": 1.0}, 
+		{ "x": 0.3, "y": 0.2 }, 
+		{ "x": 0.55, "y": 1.21}
+	],
+	"lines": [
+		{"p1": 0, "p2": 1}, 
+		{"p1": 0, "p2": 2}, 
+		{"p1": 1, "p2": 3}
+	],
+	"history": [
+		{
+			"points": [
+				{"pointID":0, "style":"active"}
+			],
+			"lines": [
+			]
+		},
+		{
+			"points": [
+				{"pointID":0, "style":"normal"},
+				{"pointID":1, "style":"active"}
+			],
+			"lines": [
+			]
+		},
+		{
+			"points": [
+				{"pointID":0, "style":"normal"},
+				{"pointID":1, "style":"normal"},
+				{"pointID":2, "style":"active"}
+			],
+			"lines": [
+			]
+		},
+		{
+			"points": [
+				{"pointID":0, "style":"normal"},
+				{"pointID":1, "style":"normal"},
+				{"pointID":2, "style":"normal"},
+				{"pointID":3, "style":"active"}
+			],
+			"lines": [
+			]
+		},
+		{
+			"points": [
+				{"pointID":0, "style":"normal"},
+				{"pointID":1, "style":"normal"},
+				{"pointID":2, "style":"normal"},
+				{"pointID":3, "style":"normal"}
+			],
+			"lines": [
+				{"lineID":0, "style":"active"}
+			]
+		},
+		{
+			"points": [
+				{"pointID":0, "style":"normal"},
+				{"pointID":1, "style":"normal"},
+				{"pointID":2, "style":"normal"},
+				{"pointID":3, "style":"normal"}
+			],
+			"lines": [
+				{"lineID":0, "style":"normal"},
+				{"lineID":1, "style":"active"}
+			]
+		},
+		{
+			"points": [
+				{"pointID":0, "style":"normal"},
+				{"pointID":1, "style":"normal"},
+				{"pointID":2, "style":"normal"},
+				{"pointID":3, "style":"normal"}
+			],
+			"lines": [
+				{"lineID":0, "style":"normal"},
+				{"lineID":1, "style":"normal"},
+				{"lineID":2, "style":"active"}
+			]
+		},
+		{
+			"points": [
+				{"pointID":0, "style":"normal"},
+				{"pointID":1, "style":"normal"},
+				{"pointID":2, "style":"normal"},
+				{"pointID":3, "style":"normal"}
+			],
+			"lines": [
+				{"lineID":0, "style":"normal"},
+				{"lineID":1, "style":"normal"},
+				{"lineID":2, "style":"normal"}
+			]
+		}
+	]
+}
+
+
+

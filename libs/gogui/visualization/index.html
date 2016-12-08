@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	
+    <title> GO-GOI Visualiser </title>
+
+    <link rel="stylesheet" type="text/css" href="resources/style.css" />
+	
+    <script type="text/javascript" src="lib/jquery-2.1.1.js"></script>
+    
+	<script type="text/javascript" src="js/DataRepository.js"></script>
+	<script type="text/javascript" src="js/Snapshot.js"></script>
+	<script type="text/javascript" src="js/SnapshotsIterator.js"></script>
+	<script type="text/javascript" src="js/FileDataReader.js"></script>
+	<script type="text/javascript" src="js/scripts.js"></script>
+	<script type="text/javascript" src="js/InputDataReader.js"></script>
+
+
+</head>
+
+<body onload="initJS();" >
+
+<div class="main">
+
+     <div class="canvas-area">
+
+         <svg class="my-canvas">
+
+           </svg>
+
+       </div>
+
+     <p class="counterLabel">
+
+      </p>
+
+      <div class="buttons-bar">
+
+              <button type="button" class="backwardButton" onclick="oneBackward();"> Wstecz </button>
+              <button type="button" class="resetButton" onclick="reset();"> Reset </button>
+              <button type="button" class="forwardButton" onclick="oneForward();"> Dalej </button>
+              <button type="button" id="playButton" onclick="play(this);"> Odtwarzaj </button>
+              <button type="button" id="parseInputButton" onclick="parseInput();" > Wklej dane </button>
+
+      </div>
+
+
+  </div>
+  <textarea id="inputArea"> Insert data... </textarea>
+
+  </body>
+  </html>

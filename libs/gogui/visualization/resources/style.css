@@ -1,0 +1,96 @@
+<style type="text/css">
+
+        .main {
+            padding: 10px;
+            height: 100%;
+            width: 100%;
+            border: 1px dotted grey;
+        }
+
+        .canvas-area {
+            width: 55vw;
+            height: 39.3vw;
+            max-height: 80vh;
+            max-width: 112vh;
+            border: 2px solid green;
+            vertical-align: middle;
+            margin-left: auto;
+            margin-right: auto;
+
+        }
+
+		.counterLabel {
+			width: 80px;
+			height: 25px;
+			text-align: center;
+			padding: 7px;
+			margin-left: auto;
+			margin-right: auto;
+			border: 1px dotted grey;
+			vertical-align: middle;
+		}
+
+		button {
+			height: 40px;
+			width: 90px;
+			padding: 0px;
+			margin: 0px;
+			margin-right: auto;
+			margin-left: auto;
+
+		}
+
+        .buttons-bar {
+			margin-top: 10px;
+			padding-top: 15px;
+			width: 100%;
+			height: 100%;
+            margin-bottom: 0px;
+			margin-right: auto;
+			margin-left: auto;
+			padding-left: auto;
+			padding-right: auto;
+			text-align:center;
+
+        }
+
+		.buttons-wrapper {
+			margin-right: auto;
+			margin-left: auto;
+			border: 1px dashed yellow;
+			vertical-align: middle;
+		}
+
+
+        .my-canvas {
+            background-color: #c0c0c0;
+            width: 100%;
+            height: 100%;
+        }
+
+		.normal-point {
+			stroke: black;
+			fill: black;
+		}
+		
+		.active-point {
+			stroke: red;
+			fill: red;
+		}
+
+		.processed-point {
+			stroke: gray;
+			fill: gray;
+		}
+		
+		.normal-line {
+			stroke: black;
+			fill: black;
+		}
+		
+		.active-line {
+			stroke: red;
+			fill: red;
+		}
+
+</style>
