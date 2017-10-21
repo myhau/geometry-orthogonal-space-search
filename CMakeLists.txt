@@ -22,7 +22,7 @@ include_directories(${Boost_INCLUDE_DIR})
 add_executable(range_tree ${SOURCE_FILES})
 add_executable(test_range_tree ${TEST_FILES} )
 
-target_link_libraries(range_tree ${Boost_LIBRARIES})
+target_link_libraries(range_tree ${Boost_LIBRARIES})a
 target_link_libraries(test_range_tree ${Boost_LIBRARIES})
 
 #enable_testing(true)
